@@ -8,6 +8,9 @@ import os
 
 import rsa
 import requests
+from get_name_pwd import get_name_pwd
+
+#import get_name_pwd
 
 # import logging
 # logging.basicConfig(level=logging.DEBUG)
@@ -79,9 +82,12 @@ def wblogin(username, password):
 
 
 if __name__ == '__main__':
+    # Create the directary for store the images
     if not os.path.exists(IMGPATH):
         os.mkdir(IMGPATH)
-    print(wblogin('*', '*'))        
+    # Load the username and password from the configure file
+    username, password = get_name_pwd()
+    print(wblogin(username, password))        
     # Get the album_id list
     response = session.get('http://photo.weibo.com/albums/get_all?uid=' + UID + '&page=1&count=5')
     album_id_json = response.content.decode('utf8')
