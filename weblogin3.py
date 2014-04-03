@@ -12,9 +12,8 @@ import requests
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-UID = '1210558765'
+UID = '1228183611'
 IMGPATH = 'picture'+ UID +'\\'
-os.mkdir(IMGPATH)
 
 WBCLIENT = 'ssologin.js(v1.4.5)'
 user_agent = (
@@ -80,16 +79,23 @@ def wblogin(username, password):
 
 
 if __name__ == '__main__':
+    if not os.path.exists(IMGPATH):
+        os.mkdir(IMGPATH)
     print(wblogin('19920314wei@sina.com', '65674663'))        
     # Get the album_id list
     response = session.get('http://photo.weibo.com/albums/get_all?uid=' + UID + '&page=1&count=5')
     album_id_json = response.content.decode('utf8')
-    album_id_list = re.findall(r'\"album_id\":\"\d+\"',album_id_json)
+    # album_id_list = re.findall(r'\"album_id\":\"\d+\"',album_id_json)
+    album_id_list_ori = json.loads(album_id_json)['data']['album_list']
+    album_id_list = list()
+    for album_item in album_id_list_ori:
+        id = album_item['album_id']
+        count = album_item['count']['photos']
+        album_id_list.append((id, count))
     
     for album_id in album_id_list:
         # Get the pic_name list and timestamp
-        album_id = re.search(r'\d+',album_id).group(0)
-        response = session.get('http://photo.weibo.com/photos/get_all?uid=' + UID + '&album_id=' + album_id + '&count=100&page=1&type=3&__rnd=1396355396834')
+        response = session.get('http://photo.weibo.com/photos/get_all?uid=' + UID + '&album_id=' + album_id[0] + '&count=' + str(album_id[1]) + '&page=1&type=3&__rnd=1396355396834')
         pic_name_json = response.content.decode('utf8')    
         pic_name_list = re.findall(r'\"pic_name\":\"[\w|\.]+\"', pic_name_json)
         for pic_name in pic_name_list:    
