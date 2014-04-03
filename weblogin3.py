@@ -9,14 +9,10 @@ import os
 import rsa
 import requests
 from get_name_pwd import get_name_pwd
+from get_name_pwd import get_uid_list
 
-#import get_name_pwd
-
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
-
-UID = '1228183611'
-IMGPATH = 'picture'+ UID +'\\'
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 WBCLIENT = 'ssologin.js(v1.4.5)'
 user_agent = (
@@ -82,33 +78,37 @@ def wblogin(username, password):
 
 
 if __name__ == '__main__':
-    # Create the directary for store the images
-    if not os.path.exists(IMGPATH):
-        os.mkdir(IMGPATH)
     # Load the username and password from the configure file
     username, password = get_name_pwd()
-    print(wblogin(username, password))        
-    # Get the album_id list
-    response = session.get('http://photo.weibo.com/albums/get_all?uid=' + UID + '&page=1&count=5')
-    album_id_json = response.content.decode('utf8')
-    # album_id_list = re.findall(r'\"album_id\":\"\d+\"',album_id_json)
-    album_id_list_ori = json.loads(album_id_json)['data']['album_list']
-    album_id_list = list()
-    for album_item in album_id_list_ori:
-        id = album_item['album_id']
-        count = album_item['count']['photos']
-        album_id_list.append((id, count))
-    
-    for album_id in album_id_list:
-        # Get the pic_name list and timestamp
-        response = session.get('http://photo.weibo.com/photos/get_all?uid=' + UID + '&album_id=' + album_id[0] + '&count=' + str(album_id[1]) + '&page=1&type=3&__rnd=1396355396834')
-        pic_name_json = response.content.decode('utf8')    
-        pic_name_list = re.findall(r'\"pic_name\":\"[\w|\.]+\"', pic_name_json)
-        for pic_name in pic_name_list:    
-            # Download the photo
-            pic_name = re.search(r'\"\w+.jpg', pic_name).group(0)[1:]
-            response = session.get('http://ww4.sinaimg.cn/mw690/' + pic_name)
-            with open(IMGPATH + pic_name, mode = 'wb') as fileout:  
-                fileout.write(response.content)
+    print(wblogin(username, password))     
+    # Load the uid list from the configure file
+    uid_list = get_uid_list()
+    for uid in uid_list:
+        IMGPATH = 'picture' + uid + '\\'
+        # Create the directary for store the images
+        if not os.path.exists(IMGPATH):
+            os.mkdir(IMGPATH)
+        # Get the album_id list
+        response = session.get('http://photo.weibo.com/albums/get_all?uid=' + uid + '&page=1&count=5')
+        album_id_json = response.content.decode('utf8')
+        # album_id_list = re.findall(r'\"album_id\":\"\d+\"',album_id_json)
+        album_id_list_ori = json.loads(album_id_json)['data']['album_list']
+        album_id_list = list()
+        for album_item in album_id_list_ori:
+            id = album_item['album_id']
+            count = album_item['count']['photos']
+            album_id_list.append((id, count))
+        
+        for album_id in album_id_list:
+            # Get the pic_name list and timestamp
+            response = session.get('http://photo.weibo.com/photos/get_all?uid=' + uid + '&album_id=' + album_id[0] + '&count=' + str(album_id[1]) + '&page=1&type=3&__rnd=1396355396834')
+            pic_name_json = response.content.decode('utf8')    
+            pic_name_list = re.findall(r'\"pic_name\":\"[\w|\.]+\"', pic_name_json)
+            for pic_name in pic_name_list:    
+                # Download the photo
+                pic_name = re.search(r'\"\w+.(jpg|gif)', pic_name).group(0)[1:]
+                response = session.get('http://ww4.sinaimg.cn/mw690/' + pic_name)
+                with open(IMGPATH + pic_name, mode = 'wb') as fileout:  
+                    fileout.write(response.content)
         
 
