@@ -12,7 +12,7 @@ import requests
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-UID = '1662068793'
+UID = '1210558765'
 IMGPATH = 'picture'+ UID +'\\'
 os.mkdir(IMGPATH)
 
