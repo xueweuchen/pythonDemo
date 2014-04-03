@@ -9,8 +9,8 @@ import os
 import rsa
 import requests
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
 
 UID = '1228183611'
 IMGPATH = 'picture'+ UID +'\\'
@@ -81,7 +81,7 @@ def wblogin(username, password):
 if __name__ == '__main__':
     if not os.path.exists(IMGPATH):
         os.mkdir(IMGPATH)
-    print(wblogin('19920314wei@sina.com', '65674663'))        
+    print(wblogin('*', '*'))        
     # Get the album_id list
     response = session.get('http://photo.weibo.com/albums/get_all?uid=' + UID + '&page=1&count=5')
     album_id_json = response.content.decode('utf8')
